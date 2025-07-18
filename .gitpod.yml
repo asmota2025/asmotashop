@@ -1,0 +1,3 @@
+tasks:
+  - init: npm install @shopify/cli @shopify/theme
+    command: echo "Project dependencies are installed. Use 'npx shopify ...' to run commands."
