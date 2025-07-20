@@ -1,0 +1,3 @@
+tasks:
+  - init: npm install && npx shopify theme check
+    command: echo "Setup complete. Run 'npx shopify theme dev --store=your-store.myshopify.com' to start."
