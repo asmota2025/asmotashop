@@ -1,182 +1,200 @@
-<header class="site-header-final">
-
-  <div class="header__main-bar">
-    
-    <div class="main-bar__left">
-      <h1 class="header__title">
-        {{ shop.name | link_to: routes.root_url }}
-      </h1>
-    </div>
-
-    <div class="main-bar__center">
-      <div class="header__search">
-        <form action="{{ routes.search_url }}" method="get">
-          <input type="search" name="q" placeholder="Search...">
-          <button type="submit">&#128269;</button>
-        </form>
+<header class="asmota-header">
+  <div class="asmota-header__top">
+    <div class="header-top__left">
+      <a href="{{ routes.root_url }}" class="header-logo">
+        {%- if settings.logo != blank -%}
+          {%- assign logo_height = 100 | divided_by: settings.logo.aspect_ratio -%}
+          <img src="{{ settings.logo | image_url: width: 100 }}"
+               alt="{{ shop.name | escape }}"
+               width="100"
+               height="{{ logo_height | round }}"
+          >
+        {%- else -%}
+          <span>{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+      <div class="location-selector" id="geo-location-container" style="display: none;">
+        <span>&#128205;</span>
+        <div>
+          <span class="location-label--light">Delivering to</span>
+          <span class="location-label--bold" id="geo-location-text">your location...</span>
+        </div>
       </div>
     </div>
 
-    <div class="main-bar__right">
-      <a href="{{ routes.account_url }}" class="header__icon-link" aria-label="My Account">&#128100;</a>
-      <a href="#wishlist" class="header__icon-link" aria-label="Wishlist">&#9825;</a>
-      <a href="{{ routes.cart_url }}" class="header__icon-link" aria-label="Cart">&#128722;</a>
-      <button type="button" class="menu-trigger" aria-controls="main-nav" aria-expanded="false" aria-label="Open menu">
-        <span>&#9776;</span>
-      </button>
+    <div class="header-top__center">
+      <form action="{{ routes.search_url }}" method="get" class="search-form" id="header-search-form">
+        <div class="search-form__category">
+          <select class="search-form__select" id="header-search-select" aria-label="Search by category">
+            <option value="{{ routes.search_url }}">All</option>
+            {%- for collection in collections -%}
+              {%- if collection.all_products_count > 0 -%}
+                <option value="{{ collection.url }}">{{ collection.title }}</option>
+              {%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+        <input type="search" name="q" placeholder="Search Asmota" class="search-form__input" value="{{ search.terms | escape }}">
+        <button type="submit" class="search-form__button" aria-label="Search">&#128269;</button>
+      </form>
     </div>
 
+    <div class="header-top__right">
+       {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
+        <div class="header-localization">
+          <localization-form>
+            {%- form 'localization', id: 'HeaderLanguageForm', class: 'localization-form' -%}
+              <div class="localization-form__select-wrapper">
+                <select name="locale_code" class="localization-form__select" aria-label="Language selector">
+                  {%- for language in localization.available_languages -%}
+                    <option value="{{ language.iso_code }}" {%- if language.iso_code == localization.language.iso_code %} selected{% endif %}>
+                      {{ language.iso_code | upcase }}
+                    </option>
+                  {%- endfor -%}
+                </select>
+              </div>
+            {%- endform -%}
+          </localization-form>
+        </div>
+      {%- endif -%}
+      <a href="{{ routes.account_url }}" class="header-link">
+        <span class="header-link__line-1">Hello, sign in</span>
+        <span class="header-link__line-2">Account & Wishlist</span>
+      </a>
+      <a href="{{ routes.account_url }}?view=orders" class="header-link">
+        <span class="header-link__line-1">Returns</span>
+        <span class="header-link__line-2">& Orders</span>
+      </a>
+      <a href="{{ routes.cart_url }}" class="header-link cart-link">
+        <div class="cart-link__icon">&#128722;</div>
+        <div class="cart-link__text">
+          <span class="cart-link__line-1">Cart</span>
+          <span class="cart-link__line-2">{{ cart.total_price | money }}</span>
+        </div>
+      </a>
+    </div>
   </div>
-  
-  <nav class="main-nav-drawer" id="main-nav">
-     {%- for link in section.settings.menu.links -%}
-        <a href="{{ link.url }}">{{ link.title }}</a>
-     {%- endfor -%}
-  </nav>
 
+  <div class="asmota-header__bottom">
+    <button class="bottom-bar__all-menu-trigger">
+      <span>&#9776; All</span>
+    </button>
+    <nav class="bottom-bar__nav">
+      {%- for link in section.settings.secondary_menu.links -%}
+        <a href="{{ link.url }}">{{ link.title }}</a>
+      {%- endfor -%}
+    </nav>
+  </div>
+  <div class="all-menu-drawer" id="all-menu-drawer">
+    <div class="all-menu-drawer__header">
+      <h3>Shop By Department</h3>
+      <button class="all-menu-drawer__close-button" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="all-menu-drawer__content">
+      {%- for link in section.settings.main_menu.links -%}
+        <a href="{{ link.url }}" class="all-menu-drawer__link">{{ link.title }}</a>
+      {%- endfor -%}
+    </div>
+  </div>
+  <div class="all-menu-drawer__overlay"></div>
 </header>
 
 {% schema %}
 {
-  "name": "Final Header",
+  "name": "Asmota Custom Header",
   "settings": [
     {
       "type": "link_list",
-      "id": "menu",
-      "label": "Menu"
+      "id": "secondary_menu",
+      "label": "Secondary menu",
+      "info": "This menu appears in the bottom bar of the header."
+    },
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Main Menu (for 'All' drawer)",
+      "default": "main-menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_language_selector",
+      "label": "Enable language selector",
+      "default": true
     }
   ]
 }
 {% endschema %}
 
 <style>
-  .site-header-final {
-    background-color: #002D5B;
-    color: white;
-    padding: 0.75rem 2rem;
-    border-bottom: 1px solid #ffffff20;
-    position: relative;
-  }
-  .site-header-final a, .site-header-final button {
-    text-decoration: none;
-    color: inherit;
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-  .header__main-bar {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-  }
-  .main-bar__left {
-    flex-shrink: 0;
-  }
-  .header__title {
-    margin: 0;
-    font-size: 2.5rem;
-    font-weight: bold;
-  }
-  .main-bar__center {
-    flex-grow: 1;
-  }
-  .header__search form {
-    display: flex;
-    width: 100%;
-    max-width: 700px;
-    margin: 0 auto;
-  }
-  .header__search input {
-    width: 100%;
-    border: 1px solid #ccc;
-    background-color: #ffffff;
-    color: #333333;
-    border-radius: 25px 0 0 25px;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-  }
-   .header__search input::placeholder {
-    color: #888888;
-  }
-  .header__search button {
-    background-color: #F58220;
-    border-radius: 0 25px 25px 0;
-    padding: 0 1.5rem;
-    font-size: 1.2rem;
-  }
-  .main-bar__right {
-    display: flex;
-    align-items: center;
-    gap: 1.75rem;
-  }
-  .header__icon-link, .menu-trigger {
-    font-size: 1.8rem;
-  }
-
-  .main-nav-drawer {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    width: 300px;
-    max-width: 90vw;
-    background-color: white;
-    border: 1px solid #e0e0e0;
-    box-shadow: -5px 5px 15px rgba(0,0,0,0.1);
-    z-index: 20;
-  }
-  .main-nav-drawer.is-active {
-    display: flex;
-    flex-direction: column;
-  }
-  .main-nav-drawer a {
-    color: #333;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #f0f0f0;
-    font-weight: bold;
-  }
-  
-  @media (max-width: 990px) {
-    .site-header-final {
-      padding: 0.75rem 1rem;
-    }
-    .header__title {
-      font-size: 1.8rem;
-    }
-    .main-bar__center, .main-bar__right {
-       display: none; 
-    }
-    .main-bar__left {
-       flex-grow: 1;
-       justify-content: space-between;
-    }
-    .menu-trigger {
-       display: block;
-       font-size: 1.5rem;
-    }
-  }
+  .asmota-header { background-color: #131921; color: white; font-size: 14px; }
+  .asmota-header a { color: white; text-decoration: none; padding: 5px; border: 1px solid transparent; }
+  .asmota-header a:hover { border-color: white; border-radius: 3px; }
+  .asmota-header__top { display: flex; align-items: center; gap: 15px; padding: 10px 15px; }
+  .header-top__left, .header-top__right { display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
+  .header-logo { font-size: 24px; font-weight: bold; }
+  .location-selector { display: flex; align-items: center; gap: 5px; }
+  .location-label--light { font-size: 12px; display: block; color: #ccc; }
+  .location-label--bold { font-weight: bold; }
+  .header-top__center { flex-grow: 1; }
+  .search-form { display: flex; width: 100%; border-radius: 5px; overflow: hidden; }
+  .search-form__category { background-color: #f3f3f3; border-right: 1px solid #ccc; flex-shrink: 0; }
+  .search-form__category select { border: none; background: none; padding: 10px 15px; font-size: 12px; -webkit-appearance: none; appearance: none; width: auto; height: 100%; }
+  .search-form__input { width: 100%; border: none; padding: 10px; font-size: 16px; color: #111; }
+  .search-form__button { background-color: #febd69; border: none; padding: 0 15px; cursor: pointer; font-size: 20px; }
+  .header-link { display: block; }
+  .header-link__line-1 { font-size: 12px; display: block; }
+  .header-link__line-2 { font-weight: bold; }
+  .cart-link { display: flex; align-items: flex-end; gap: 5px; }
+  .cart-link__icon { font-size: 28px; line-height: 1; }
+  .cart-link__text { text-align: left; line-height: 1.1; }
+  .cart-link__line-1 { font-size: 12px; display: block; color: #ccc; }
+  .cart-link__line-2 { font-weight: bold; font-size: 14px; display: block; color: white; }
+  .asmota-header__bottom { background-color: #232f3e; display: flex; align-items: center; gap: 15px; padding: 8px 15px; font-size: 14px; }
+  .bottom-bar__all-menu-trigger { font-weight: bold; background: none; border: none; color: white; cursor: pointer; font-size: 14px; }
+  .bottom-bar__nav { display: flex; gap: 15px; flex-wrap: wrap; }
+  .all-menu-drawer { position: fixed; top: 0; left: 0; width: 350px; max-width: 80%; height: 100%; background-color: white; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease-in-out; display: flex; flex-direction: column; }
+  .all-menu-drawer.is-open { transform: translateX(0); }
+  .all-menu-drawer__overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 99; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out; }
+  .all-menu-drawer__overlay.is-open { opacity: 1; visibility: visible; }
+  .all-menu-drawer__header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background-color: #232f3e; color: white; flex-shrink: 0; }
+  .all-menu-drawer__header h3 { margin: 0; font-size: 1.2rem; color: #FFFFFF !important; }
+  .all-menu-drawer__close-button { font-size: 2rem; line-height: 1; }
+  .all-menu-drawer__content { flex-grow: 1; overflow-y: auto; }
+  .all-menu-drawer__link { display: block; padding: 1rem 1.5rem; color: #111111 !important; border-bottom: 1px solid #f0f0f0; font-weight: bold; }
+  .header-localization select { background-color: transparent; color: white; border: 1px solid transparent; border-radius: 3px; padding: 5px; font-weight: bold; font-size: 14px; }
+  .header-localization select:hover { border-color: white; }
+  .header-localization option { color: black; background-color: white; }
+  @media (max-width: 1024px) { .location-selector, .header-top__right .header-link:not(.cart-link) { display: none; } .header-top__center { padding: 0 10px; } }
+  @media (max-width: 768px) { .asmota-header__top { flex-wrap: wrap; } .header-top__center { order: 3; width: 100%; padding: 10px 0 0 0; } .asmota-header__bottom { display: none; } }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const menuButton = document.querySelector('.menu-trigger');
-    const mobileNav = document.getElementById('main-nav');
-
-    if (menuButton && mobileNav) {
-      menuButton.addEventListener('click', function(event) {
-        event.stopPropagation();
-        const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
-        mobileNav.classList.toggle('is-active');
-        menuButton.setAttribute('aria-expanded', !isExpanded);
-      });
-      
-      document.addEventListener('click', function(event) {
-        const isClickInside = mobileNav.contains(event.target) || menuButton.contains(event.target);
-        if (!isClickInside && mobileNav.classList.contains('is-active')) {
-          mobileNav.classList.remove('is-active');
-          menuButton.setAttribute('aria-expanded', 'false');
+    const searchForm = document.getElementById('header-search-form');
+    const searchSelect = document.getElementById('header-search-select');
+    if (searchForm && searchSelect) {
+      searchSelect.addEventListener('change', function() { searchForm.action = this.value; });
+    }
+    const allMenuButton = document.querySelector('.bottom-bar__all-menu-trigger');
+    const allMenuDrawer = document.getElementById('all-menu-drawer');
+    const allMenuCloseButton = document.querySelector('.all-menu-drawer__close-button');
+    const allMenuOverlay = document.querySelector('.all-menu-drawer__overlay');
+    if (allMenuButton && allMenuDrawer) {
+      const openMenu = () => { allMenuDrawer.classList.add('is-open'); allMenuOverlay.classList.add('is-open'); };
+      const closeMenu = () => { allMenuDrawer.classList.remove('is-open'); allMenuOverlay.classList.remove('is-open'); };
+      allMenuButton.addEventListener('click', openMenu);
+      allMenuCloseButton.addEventListener('click', closeMenu);
+      allMenuOverlay.addEventListener('click', closeMenu);
+    }
+    const locationContainer = document.getElementById('geo-location-container');
+    const locationText = document.getElementById('geo-location-text');
+    if (locationContainer && locationText) {
+      fetch('https://ipwho.is/').then(response => response.json()).then(data => {
+        if (data.success && data.city && data.region) {
+          locationText.textContent = `${data.city}, ${data.region}`;
+          locationContainer.style.display = 'flex';
         }
-      });
+      }).catch(error => { console.error('Error fetching geolocation:', error); });
     }
   });
 </script>
