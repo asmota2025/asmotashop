@@ -1,3 +1,8 @@
 tasks:
-  - init: npm install -g @shopify/cli @shopify/theme
-    command: echo "Setup complete. You can now start the dev server."
+  - init: |
+      npm install -g @shopify/cli @shopify/theme
+      echo 'export PATH=$(npm bin -g):$PATH' >> ~/.bashrc
+    command: |
+      source ~/.bashrc
+      cd asmotashop
+      shopify theme dev --store 110efa-6b.myshopify.com
