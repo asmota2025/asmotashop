@@ -1,0 +1,282 @@
+<div class="cinematic-slideshow" data-section-id="{{ section.id }}" data-autoplay="{{ section.settings.autoplay }}" data-delay="{{ section.settings.delay | times: 1000 }}">
+  <div class="slides-container">
+    {%- for block in section.blocks -%}
+      <div class="slide-item {% if forloop.first %}is-active{% endif %}" {{ block.shopify_attributes }}>
+        <a href="{{ block.settings.link }}" class="slide-item__link">
+          <div class="slide-item__image-wrapper">
+            {%- if block.settings.image != blank -%}
+              <img 
+                src="{{ block.settings.image | image_url: width: 1920 }}" 
+                alt="{{ block.settings.image.alt | escape }}" 
+                class="slide-item__image"
+                width="1920"
+                height="{{ 1920 | divided_by: block.settings.image.aspect_ratio | round }}"
+                loading="lazy"
+              >
+            {%- else -%}
+              <div class="placeholder-image">Slide {{ forloop.index }}</div>
+            {%- endif -%}
+          </div>
+          <div class="slide-item__content-overlay">
+            <h2 class="slide-item__heading">{{ block.settings.heading | escape }}</h2>
+            <p class="slide-item__subheading">{{ block.settings.subheading | escape }}</p>
+            {%- if block.settings.button_label != blank -%}
+              <span class="btn">{{ block.settings.button_label | escape }}</span>
+            {%- endif -%}
+          </div>
+        </a>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  {%- if section.blocks.size > 1 -%}
+    <div class="slideshow-navigation">
+      <button class="slideshow-arrow--cinematic prev">&#10094;</button>
+      <div class="slideshow-dots--cinematic"></div>
+      <button class="slideshow-arrow--cinematic next">&#10095;</button>
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+  .cinematic-slideshow {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1920 / 300; /* Sets the cinematic aspect ratio for desktop */
+    overflow: hidden;
+  }
+  .slides-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .slide-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease-in-out;
+  }
+  .slide-item.is-active {
+    opacity: 1;
+    visibility: visible;
+  }
+  .slide-item__link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+  }
+  .slide-item__image-wrapper {
+    width: 100%;
+    height: 100%;
+  }
+  .slide-item__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f2f2f2;
+    color: #888;
+    font-size: 2rem;
+  }
+  .slide-item__content-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    background-color: rgba(0,0,0,0.4);
+    padding: 1rem;
+  }
+  .slide-item__heading { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .slide-item__subheading { font-size: 1rem; margin-bottom: 1.5rem; }
+  .slideshow-navigation {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 5;
+  }
+  .slideshow-arrow--cinematic {
+    background: none; border: none; color: white; font-size: 2rem;
+    cursor: pointer; padding: 0.5rem; text-shadow: 0 0 5px rgba(0,0,0,0.5);
+  }
+  .slideshow-dots--cinematic { display: flex; gap: 0.5rem; }
+  .dot--cinematic {
+    width: 10px; height: 10px; border-radius: 50%;
+    background-color: #ffffff80; cursor: pointer; border: none;
+  }
+  .dot--cinematic.is-active { background-color: white; }
+
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .cinematic-slideshow {
+      aspect-ratio: 16 / 9; /* Change to a more mobile-friendly aspect ratio */
+    }
+    .slide-item__heading { font-size: 1.5rem; }
+    .slide-item__subheading { font-size: 0.9rem; }
+  }
+</style>
+
+<script>
+  class CinematicSlideshow {
+    constructor(element) {
+      this.element = element;
+      this.slides = this.element.querySelectorAll('.slide-item');
+      this.prevButton = this.element.querySelector('.slideshow-arrow--cinematic.prev');
+      this.nextButton = this.element.querySelector('.slideshow-arrow--cinematic.next');
+      this.dotsContainer = this.element.querySelector('.slideshow-dots--cinematic');
+      this.autoplay = this.element.dataset.autoplay === 'true';
+      this.delay = parseInt(this.element.dataset.delay, 10);
+      this.currentIndex = 0;
+      this.interval = null;
+      this.init();
+    }
+    init() {
+      if (this.slides.length <= 1) {
+        if (this.prevButton) this.prevButton.style.display = 'none';
+        if (this.nextButton) this.nextButton.style.display = 'none';
+        return;
+      }
+      this.setupDots();
+      this.setupEventListeners();
+      if (this.autoplay) {
+        this.startAutoplay();
+      }
+    }
+    setupDots() {
+      this.slides.forEach((_, index) => {
+        const dot = document.createElement('button');
+        dot.classList.add('dot--cinematic');
+        if (index === 0) dot.classList.add('is-active');
+        dot.addEventListener('click', () => this.goToSlide(index));
+        this.dotsContainer.appendChild(dot);
+      });
+      this.dots = this.dotsContainer.querySelectorAll('.dot--cinematic');
+    }
+    setupEventListeners() {
+      this.prevButton.addEventListener('click', () => this.changeSlide(-1));
+      this.nextButton.addEventListener('click', () => this.changeSlide(1));
+    }
+    changeSlide(direction) {
+      const newIndex = (this.currentIndex + direction + this.slides.length) % this.slides.length;
+      this.goToSlide(newIndex);
+    }
+    goToSlide(index) {
+      this.slides[this.currentIndex].classList.remove('is-active');
+      this.dots[this.currentIndex].classList.remove('is-active');
+      this.currentIndex = index;
+      this.slides[this.currentIndex].classList.add('is-active');
+      this.dots[this.currentIndex].classList.add('is-active');
+      if (this.autoplay) {
+        this.resetAutoplay();
+      }
+    }
+    startAutoplay() {
+      this.interval = setInterval(() => this.changeSlide(1), this.delay);
+    }
+    resetAutoplay() {
+      clearInterval(this.interval);
+      this.startAutoplay();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const slideshowElement = document.querySelector(`[data-section-id="{{ section.id }}"]`);
+    if (slideshowElement) {
+      new CinematicSlideshow(slideshowElement);
+    }
+  });
+
+  document.addEventListener('shopify:section:load', (event) => {
+    const sectionElement = event.target.querySelector(`[data-section-id="${event.detail.sectionId}"]`);
+    if (sectionElement && sectionElement.classList.contains('cinematic-slideshow')) {
+      new CinematicSlideshow(sectionElement);
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Cinematic Slideshow",
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "delay",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Change slides every",
+      "default": 5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Use wide images (e.g., 1920px wide) for best results."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Cinematic Slide"
+        },
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Describe your slide here."
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button Label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Button Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cinematic Slideshow"
+    }
+  ]
+}
+{% endschema %}
