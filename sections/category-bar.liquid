@@ -1,0 +1,45 @@
+<nav class="category-bar" aria-label="Categories">
+  <div class="page-width">
+    {%- for link in section.settings.category_menu.links -%}
+      <a href="{{ link.url }}" class="category-bar__link">{{ link.title }}</a>
+    {%- endfor -%}
+  </div>
+</nav>
+
+<style>
+  .category-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .category-bar .page-width {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding: 0.75rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .category-bar__link {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Category Bar",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "category_menu",
+      "label": "Category Menu",
+      "info": "This menu will be displayed in the category bar."
+    }
+  ]
+}
+{% endschema %}

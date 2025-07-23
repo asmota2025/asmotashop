@@ -20,6 +20,7 @@
             height="{{ 500 | divided_by: product.featured_image.aspect_ratio | round }}"
             loading="lazy"
           >
+            <button class="product-card__wishlist" aria-label="Add to wishlist">&#9825;</button>
         </a>
         <div class="product-card__info">
           <a href="{{ product.url }}" class="product-card__title">{{ product.title }}</a>
@@ -33,9 +34,6 @@
           <div class="product-card__actions">
             {%- form 'product', product, class: 'product-card__form' -%}
               <input type="hidden" name="id" value="{{ product.first_available_variant.id }}">
-              <button type="submit" name="add" class="product-card__add-to-cart">
-                Add To Cart
-              </button>
             {%- endform -%}
             <button class="product-card__wishlist" aria-label="Add to wishlist">&#9825;</button>
           </div>
@@ -73,7 +71,10 @@
     display: flex;
     flex-direction: column;
   }
-  .product-card__image-wrapper { display: block; }
+  .product-card__image-wrapper { 
+  display: block; 
+  position: relative; /* Add this line */
+}
   .product-card__image-wrapper img {
     width: 100%;
     height: auto;
@@ -143,19 +144,31 @@
     font-weight: bold;
     cursor: pointer;
   }
-  .product-card__wishlist {
-    background-color: #f1f1f1;
-    color: #333;
-    border: 1px solid #ccc;
-    padding: 0.75rem;
-    border-radius: 5px;
-    font-size: 1.5rem; /* Makes the heart icon bigger */
-    line-height: 1;
-    cursor: pointer;
-  }
-  .product-card__wishlist:hover {
-    color: #c00;
-  }
+ .product-card__wishlist {
+  /* Positioning */
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+
+  /* New circular style */
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #111;
+  border: none;
+  border-radius: 50%;
+  width: 44px; /* Increased size */
+  height: 44px; /* Increased size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem; /* Increased heart size */
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.product-card__wishlist:hover {
+  transform: scale(1.1);
+  background-color: rgba(255, 255, 255, 1);
+}
 
   /* Responsive adjustments */
   @media (max-width: 1200px) {

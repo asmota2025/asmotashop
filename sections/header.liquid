@@ -1,4 +1,3 @@
-{% comment %} Re-syncing the file {% endcomment %}
 <header class="asmota-header">
   <div class="asmota-header__top">
     <div class="header-top__left">
@@ -41,30 +40,14 @@
     </div>
 
     <div class="header-top__right">
-       {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
-        <div class="header-localization">
-          <localization-form>
-            {%- form 'localization', id: 'HeaderLanguageForm', class: 'localization-form' -%}
-              <div class="localization-form__select-wrapper">
-                <select name="locale_code" class="localization-form__select" aria-label="Language selector">
-                  {%- for language in localization.available_languages -%}
-                    <option value="{{ language.iso_code }}" {%- if language.iso_code == localization.language.iso_code %} selected{% endif %}>
-                      {{ language.iso_code | upcase }}
-                    </option>
-                  {%- endfor -%}
-                </select>
-              </div>
-            {%- endform -%}
-          </localization-form>
-        </div>
-      {%- endif -%}
+      <a href="#" class="header-link"><span>EN</span></a>
       <a href="{{ routes.account_url }}" class="header-link">
         <span class="header-link__line-1">Hello, sign in</span>
         <span class="header-link__line-2">Account & Wishlist</span>
       </a>
       <a href="{{ routes.account_url }}?view=orders" class="header-link">
-        <span class="header-link__line-1">Track</span>
-        <span class="header-link__line-2">Your Orders</span>
+        <span class="header-link__line-1">Returns</span>
+        <span class="header-link__line-2">& Orders</span>
       </a>
       <a href="{{ routes.cart_url }}" class="header-link cart-link">
         <div class="cart-link__icon">&#128722;</div>
@@ -78,7 +61,7 @@
 
   <div class="asmota-header__bottom">
     <button class="bottom-bar__all-menu-trigger">
-      <span>&#9776; Categories</span>
+      <span>&#9776; All</span>
     </button>
     <nav class="bottom-bar__nav">
       {%- for link in section.settings.secondary_menu.links -%}
@@ -88,7 +71,7 @@
   </div>
   <div class="all-menu-drawer" id="all-menu-drawer">
     <div class="all-menu-drawer__header">
-      <h3>Categories</h3>
+      <h3>Shop By Department</h3>
       <button class="all-menu-drawer__close-button" aria-label="Close menu">&times;</button>
     </div>
     <div class="all-menu-drawer__content">
@@ -115,19 +98,13 @@
       "id": "main_menu",
       "label": "Main Menu (for 'All' drawer)",
       "default": "main-menu"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_language_selector",
-      "label": "Enable language selector",
-      "default": true
     }
   ]
 }
 {% endschema %}
 
 <style>
-  .asmota-header { background-color: #131921; color: white; font-size: 14px; }
+  .asmota-header { background-color: #131921; color: white; font-size: 14px; position: relative; z-index: 10; }
   .asmota-header a { color: white; text-decoration: none; padding: 5px; border: 1px solid transparent; }
   .asmota-header a:hover { border-color: white; border-radius: 3px; }
   .asmota-header__top { display: flex; align-items: center; gap: 15px; padding: 10px 15px; }
@@ -153,29 +130,56 @@
   .asmota-header__bottom { background-color: #232f3e; display: flex; align-items: center; gap: 15px; padding: 8px 15px; font-size: 14px; }
   .bottom-bar__all-menu-trigger { font-weight: bold; background: none; border: none; color: white; cursor: pointer; font-size: 14px; }
   .bottom-bar__nav { display: flex; gap: 15px; flex-wrap: wrap; }
-  .all-menu-drawer { position: fixed; top: 0; left: 0; width: 350px; max-width: 80%; height: 100%; background-color: white; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease-in-out; display: flex; flex-direction: column; }
+
+  /* Corrected Drawer Styles */
+  .all-menu-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 350px;
+  max-width: 80%;
+  height: 100%;
+  background-color: white;
+  z-index: 9999; /* Use a very high z-index to ensure it's on top */
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
   .all-menu-drawer.is-open { transform: translateX(0); }
-  .all-menu-drawer__overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 99; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out; }
+  .all-menu-drawer__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 9998; /* Also a very high z-index */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out;
+}
   .all-menu-drawer__overlay.is-open { opacity: 1; visibility: visible; }
   .all-menu-drawer__header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background-color: #232f3e; color: white; flex-shrink: 0; }
-  .all-menu-drawer__header h3 { margin: 0; font-size: 1.2rem; color: #FFFFFF !important; }
+  .all-menu-drawer__header h3 { margin: 0; font-size: 1.2rem; }
   .all-menu-drawer__close-button { font-size: 2rem; line-height: 1; }
   .all-menu-drawer__content { flex-grow: 1; overflow-y: auto; }
   .all-menu-drawer__link { display: block; padding: 1rem 1.5rem; color: #111111 !important; border-bottom: 1px solid #f0f0f0; font-weight: bold; }
-  .header-localization select { background-color: transparent; color: white; border: 1px solid transparent; border-radius: 3px; padding: 5px; font-weight: bold; font-size: 14px; }
-  .header-localization select:hover { border-color: white; }
-  .header-localization option { color: black; background-color: white; }
+
+  /* Responsive Styles */
   @media (max-width: 1024px) { .location-selector, .header-top__right .header-link:not(.cart-link) { display: none; } .header-top__center { padding: 0 10px; } }
   @media (max-width: 768px) { .asmota-header__top { flex-wrap: wrap; } .header-top__center { order: 3; width: 100%; padding: 10px 0 0 0; } .asmota-header__bottom { display: none; } }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Search form logic
     const searchForm = document.getElementById('header-search-form');
     const searchSelect = document.getElementById('header-search-select');
     if (searchForm && searchSelect) {
       searchSelect.addEventListener('change', function() { searchForm.action = this.value; });
     }
+    // 'All' menu logic
     const allMenuButton = document.querySelector('.bottom-bar__all-menu-trigger');
     const allMenuDrawer = document.getElementById('all-menu-drawer');
     const allMenuCloseButton = document.querySelector('.all-menu-drawer__close-button');
@@ -187,6 +191,7 @@
       allMenuCloseButton.addEventListener('click', closeMenu);
       allMenuOverlay.addEventListener('click', closeMenu);
     }
+    // Geolocation logic
     const locationContainer = document.getElementById('geo-location-container');
     const locationText = document.getElementById('geo-location-text');
     if (locationContainer && locationText) {
