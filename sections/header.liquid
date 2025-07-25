@@ -10,7 +10,7 @@
                height="{{ logo_height | round }}"
           >
         {%- else -%}
-          <span>{{ shop.name }}</span>
+        <span>{{ shop.name }}</span>
         {%- endif -%}
       </a>
       <div class="location-selector" id="geo-location-container" style="display: none;">
@@ -21,7 +21,7 @@
         </div>
       </div>
     </div>
-
+    
     <div class="header-top__center">
       <form action="{{ routes.search_url }}" method="get" class="search-form" id="header-search-form">
         <div class="search-form__category">
@@ -34,11 +34,11 @@
             {%- endfor -%}
           </select>
         </div>
-        <input type="search" name="q" placeholder="Search Asmota" class="search-form__input" value="{{ search.terms | escape }}">
+          <input type="search" name="q" placeholder="Search Asmota" class="search-form__input" value="{{ search.terms | escape }}">
         <button type="submit" class="search-form__button" aria-label="Search">&#128269;</button>
-      </form>
-    </div>
-
+        </form>
+      </div>
+    
     <div class="header-top__right">
       <a href="#" class="header-link"><span>EN</span></a>
       <a href="{{ routes.account_url }}" class="header-link">
@@ -58,7 +58,7 @@
       </a>
     </div>
   </div>
-
+  
   <div class="asmota-header__bottom">
     <button class="bottom-bar__all-menu-trigger">
       <span>&#9776; Shop By Category</span>
@@ -130,7 +130,7 @@
   .asmota-header__bottom { background-color: #232f3e; display: flex; align-items: center; gap: 15px; padding: 8px 15px; font-size: 14px; }
   .bottom-bar__all-menu-trigger { font-weight: bold; background: none; border: none; color: white; cursor: pointer; font-size: 14px; }
   .bottom-bar__nav { display: flex; gap: 15px; flex-wrap: wrap; }
-
+  
   /* Corrected Drawer Styles */
   .all-menu-drawer {
   position: fixed;
@@ -143,15 +143,15 @@
   z-index: 9999; /* Use a very high z-index to ensure it's on top */
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
-  display: flex;
+    display: flex;
   flex-direction: column;
-}
+  }
   .all-menu-drawer.is-open { transform: translateX(0); }
   .all-menu-drawer__overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+    width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,0.5);
   z-index: 9998; /* Also a very high z-index */
